@@ -1,11 +1,13 @@
 import os
 import re
 import random
+import datetime
 from dataclasses import dataclass
 
 import telebot
 
 import constants
+from models import create_tables, User, Expense
 
 
 bot = telebot.TeleBot(
@@ -21,6 +23,11 @@ class Message:
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    username = message.from_user.username
+
+    if not User.get_or_none(User.username == username):
+        User.create(username=username)
+
     bot.send_message(message.chat.id, constants.START_TEXT)
 
 
@@ -31,17 +38,20 @@ def help(message):
 
 @bot.message_handler(commands=['today'])
 def today(message):
-    pass
+    spent = Expense.objects.today()
+    bot.send_message(message.chat.id, f"You spent today {spent}$")
 
 
 @bot.message_handler(commands=['week'])
 def week(message):
-    pass
+    spent = Expense.objects.week()
+    bot.send_message(message.chat.id, f"You spent in this week {spent}$")
 
 
 @bot.message_handler(commands=['month'])
 def month(message):
-    pass
+    spent = Expense.objects.month()
+    bot.send_message(message.chat.id, f"You spent in this month {spent}$")
 
 
 @bot.message_handler(commands=['status'])
@@ -56,12 +66,22 @@ def categories(message):
 
 @bot.message_handler(commands=['share'])
 def share(message):
-    pass
+    if not message.text.startwith('@'):
+        bot.send_message(message.chat.id, "Send message with: @username")
+    username = message.text.replace('@', '')
+    # TODO: Added in Share model
+    bot.send_message(message.chat.id, f"Shared with the user {username}")
 
 
 @bot.message_handler(func=lambda message: True)
 def text(message):
     result = parse_message(message)
+    if result:
+        Expense.create(
+            amount=result.amount,
+            category=result.category,
+            user=User.get(User.username == message.from_user.username)
+        )
     answer = random_answer() if result else "I don't understand you("
     bot.send_message(message.chat.id, answer)
 
@@ -79,4 +99,5 @@ def random_answer():
 
 
 if __name__ == '__main__':
+    create_tables()
     bot.polling()
