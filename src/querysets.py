@@ -41,3 +41,12 @@ class ExpenseQueryset:
             (models.Expense.created_at.year == now.year) &
             (models.Expense.created_at.month == now.month)
         ).first().total or 0
+
+    @staticmethod
+    def status():
+        return models.Expense.select(
+            models.Expense.category,
+            fn.SUM(models.Expense.amount).alias('total')
+        ).group_by(
+            models.Expense.category
+        )

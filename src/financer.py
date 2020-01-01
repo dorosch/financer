@@ -56,7 +56,13 @@ def month(message):
 
 @bot.message_handler(commands=['status'])
 def status(message):
-    pass
+    spents = "\n".join(
+        [
+            f"  {record.category}: {record.total}$"
+            for record in Expense.objects.status()
+        ]
+    )
+    bot.send_message(message.chat.id, f"You spent by categories: \n{spents}")
 
 
 @bot.message_handler(commands=['categories'])
@@ -90,12 +96,24 @@ def parse_message(message):
     match = re.match(constants.AMOUNT_CATEGORY_REGEXP, message.text)
 
     return Message(
-        amount=match.group(1).replace('$', ''), category=match.group(2)
+        amount=match.group(1).replace('$', ''),
+        category=match_category(match.group(2))
     ) if match else None
 
 
 def random_answer():
     return random.choice(constants.ANSWERS)
+
+
+def match_category(category):
+    if category in constants.CATEGORIES.keys():
+        return category
+
+    for key in constants.CATEGORIES:
+        if category in constants.CATEGORIES.get(key):
+            return key
+
+    return constants.DEFAULT_CATEGORY
 
 
 if __name__ == '__main__':

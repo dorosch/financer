@@ -37,6 +37,8 @@ ANSWERS = (
     "Okay smartassy",
 )
 
+DEFAULT_CATEGORY = 'others'
+
 CATEGORIES = {
     'eat': (
         'chocolate', 'goodies', 'sweets', 'milk', 'bread',
@@ -51,7 +53,7 @@ CATEGORIES = {
     'health': (
         'medicine', 'doctor', 'dental', 'tablets'
     ),
-    'others': (
+    DEFAULT_CATEGORY: (
 
     )
 }
