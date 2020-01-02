@@ -1,0 +1,11 @@
+version: '3'
+services:
+  financer-bot:
+    container_name: financer
+    env_file: .env
+    build:
+      context: .
+    volumes:
+      - ./src:/app
+    entrypoint: ["python3"]
+    command: ["/app/financer.py"]

@@ -5,13 +5,11 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 COPY src /app
 
-COPY requirements.txt /app
+COPY requirements.txt /tmp
 
 WORKDIR /app
 
-RUN pip3 install -r requirements.txt \
-    && rm -f /app/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt \
+    && rm -f /tmp/requirements.txt
 
-ENTRYPOINT ["python3"]
-
-CMD ["financer.py"]
+ENTRYPOINT ["sh"]
