@@ -1,18 +1,10 @@
-import os
 import re
 import random
-import datetime
 from dataclasses import dataclass
 
-import telebot
-
 import constants
-from models import create_tables, User, Expense
-
-
-bot = telebot.TeleBot(
-    os.environ.get('TELEGRAM_API_KEY')
-)
+from settings import bot
+from models import User, Expense
 
 
 @dataclass
@@ -22,43 +14,60 @@ class Message:
 
 
 @bot.message_handler(commands=['start'])
-def start(message):
-    username = message.from_user.username
+def handle_start(message):
+    """
+    Process command '/start' for a new user
+    """
+    # Save a new user
+    User.get_or_create(username=message.from_user.username)
 
-    if not User.get_or_none(User.username == username):
-        User.create(username=username)
-
-    bot.send_message(message.chat.id, constants.START_TEXT)
+    # Send welcome text
+    bot.send_message(message.chat.id, constants.WELCOME_TEXT)
 
 
 @bot.message_handler(commands=['help'])
-def help(message):
+def handle_help(message):
+    """
+    Send help about available commands.
+    """
     bot.send_message(message.chat.id, constants.COMMANDS)
 
 
 @bot.message_handler(commands=['today'])
-def today(message):
-    spent = Expense.objects.today()
-    bot.send_message(message.chat.id, f"You spent today {spent}$")
+def handle_today(message):
+    """
+    Calculate spending today.
+    """
+    answer = f"You spent today {Expense.objects.today()}$"
+    bot.send_message(message.chat.id, answer)
 
 
 @bot.message_handler(commands=['week'])
-def week(message):
-    spent = Expense.objects.week()
-    bot.send_message(message.chat.id, f"You spent in this week {spent}$")
+def handle_week(message):
+    """
+    Calculate spending per week.
+    """
+    answer = f"You spent in this week {Expense.objects.week()}$"
+    bot.send_message(message.chat.id, answer)
 
 
 @bot.message_handler(commands=['month'])
-def month(message):
+def handle_month(message):
+    """
+    Calculate spending per month.
+    """
     spent = Expense.objects.month()
     bot.send_message(message.chat.id, f"You spent in this month {spent}$")
 
 
 @bot.message_handler(commands=['status'])
-def status(message):
+def handle_status(message):
+    """
+    Calculate spending by category for the last month.
+    """
     spents = "\n".join(
         [
-            f"  {record.category}: {record.total}$"
+            f"  {record.category}: {round(record.total, 2)}$"
             for record in Expense.objects.status()
         ]
     )
@@ -66,21 +75,24 @@ def status(message):
 
 
 @bot.message_handler(commands=['categories'])
-def categories(message):
+def handle_categories(message):
+    """
+    Return Available Categories.
+    """
     bot.send_message(message.chat.id, ', '.join(constants.CATEGORIES.keys()))
 
 
 @bot.message_handler(commands=['share'])
-def share(message):
-    if not message.text.startwith('@'):
-        bot.send_message(message.chat.id, "Send message with: @username")
-    username = message.text.replace('@', '')
-    # TODO: Added in Share model
-    bot.send_message(message.chat.id, f"Shared with the user {username}")
+def handle_share(message):
+    # TODO: Implement me!
+    bot.send_message(message.chat.id, "Not implemented yet, sorry")
 
 
 @bot.message_handler(func=lambda message: True)
-def text(message):
+def handle_text(message):
+    """
+    Process message like: '1.5$ coffee'
+    """
     result = parse_message(message)
     if result:
         Expense.create(
@@ -117,5 +129,4 @@ def match_category(category):
 
 
 if __name__ == '__main__':
-    create_tables()
     bot.polling()

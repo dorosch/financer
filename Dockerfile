@@ -9,7 +9,7 @@ COPY requirements.txt /tmp
 
 WORKDIR /app
 
-RUN pip3 install -r /tmp/requirements.txt \
-    && rm -f /tmp/requirements.txt
+RUN pip3 install -r /tmp/requirements.txt && \
+    rm -f /tmp/requirements.txt
 
 ENTRYPOINT ["sh"]

@@ -9,7 +9,7 @@ COMMANDS = (
     "View the categories of expense - /categories\n"
 )
 
-START_TEXT = (
+WELCOME_TEXT = (
     "Hi, I'm your financial assistant!\n"
     "I will help you calculate your cash flows.\n"
     "Now I work only with dollars, sorry(\n"
@@ -57,3 +57,8 @@ CATEGORIES = {
 
     )
 }
+
+CATEGORIES_CHOICES = list(
+    (category, category.capitalize())
+    for category in CATEGORIES.keys()
+)

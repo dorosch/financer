@@ -10,12 +10,7 @@ Telegram bot for cost accounting.
 $ echo "TELEGRAM_API_KEY=YOUR_API_TOKEN" > .env
 ```
 
-2. Build docker-container:
+2. Up service:
 ```bash
-$ docker build --tag financer:latest .
-```
-
-3. And run container:
-```bash
-$ docker run --env-file .env -it --rm financer:latest
+$ docker-compose up --build
 ```

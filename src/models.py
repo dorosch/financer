@@ -4,9 +4,7 @@ import peewee as models
 
 import constants
 import querysets
-
-
-db = models.SqliteDatabase('database.sqlite')
+import settings
 
 
 class User(models.Model):
@@ -17,42 +15,33 @@ class User(models.Model):
     objects = querysets.UserQueryset()
 
     class Meta:
-        database = db
+        database = settings.DATABASE
 
 
 class Share(models.Model):
     user = models.ForeignKeyField(
         User
     )
-
     participant = models.ForeignKeyField(
-        User,
-        backref='shared'
+        User, backref='shared'
     )
 
     objects = querysets.ShareQueryset()
 
     class Meta:
-        database = db
+        database = settings.DATABASE
 
 
 class Expense(models.Model):
     user = models.ForeignKeyField(
-        User,
-        backref='expenses'
+        User, backref='expenses'
     )
-
     amount = models.FloatField(
         default=0
     )
-
     category = models.CharField(
-        choices=[
-            (category, category.capitalize())
-            for category in constants.CATEGORIES.keys()
-        ]
+        choices=constants.CATEGORIES_CHOICES
     )
-
     created_at = models.DateTimeField(
         default=datetime.datetime.now
     )
@@ -60,9 +49,8 @@ class Expense(models.Model):
     objects = querysets.ExpenseQueryset()
 
     class Meta:
-        database = db
+        database = settings.DATABASE
 
 
-def create_tables():
-    with db as database:
-        database.create_tables([User, Share, Expense])
+with settings.DATABASE as database:
+    database.create_tables([User, Share, Expense])
